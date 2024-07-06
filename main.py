@@ -52,8 +52,11 @@ def add_employee():
 
 @app.route('/update-form/<emp_id>')
 def update_form(emp_id):
-    employee = Employee.get_employee(emp_id)
-    if employees:
+    if 'user' not in session:
+        return redirect('/')
+
+    employee = Employees.get_employee(emp_id)
+    if employee:
         return render_template('update_employee.html', employee=employee)
     else:
         session["message"] = "Employee not found."
@@ -61,12 +64,15 @@ def update_form(emp_id):
 
 @app.route('/update-employee', methods=["POST"])
 def update_employee():
+    if 'user' not in session:
+        return redirect('/')
+
     emp_id = request.form["emp_id"]
     lname = request.form["lname"]
     fname = request.form["fname"]
     mname = request.form["mname"]
     
-    success = Employee.update_employee(emp_id, lname, fname, mname)
+    success = Employees.update_employee(emp_id, lname, fname, mname)
 
     if success:
         session["message"] = "Successfully updated"
@@ -75,6 +81,16 @@ def update_employee():
 
     return redirect('/employee-list')
 
+@app.route('/delete/<emp_id>', methods=['POST'])
+def delete_employee(emp_id):
+    success = Employee.delete_employee(emp_id)
+    
+    if success:
+        session["message"] = "Successfully deleted employee."
+    else:
+        session["message"] = "Failed to delete employee."
+    
+    return redirect('/employee-list')
 
 if __name__ == '__main__':
     app.run()
